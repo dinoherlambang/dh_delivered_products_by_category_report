@@ -58,6 +58,17 @@ Main tables used:
 - `product_product`
 - `product_template`
 
+### Why this SQL is secure
+
+The SQL in this module is secure by design:
+
+- The view definition is a static SQL string inside `init()`.
+- No user input, request parameter, or context value is concatenated into SQL.
+- No dynamic SQL construction is used.
+- The model is read-only at ACL level, so users cannot write through this report model.
+
+Because there is no user-controlled SQL interpolation, classic SQL injection vectors are not present in this implementation.
+
 ### Why no `product_category` join?
 
 `product_template.categ_id` already stores the Product Category foreign key, so the report reads category directly from `product_template` instead of joining `product_category` only to get the same identifier.
@@ -69,6 +80,18 @@ This keeps the query simpler and avoids unnecessary I/O.
 For done moves in Odoo 13, `stock_move.product_uom_qty` represents the moved quantity. Because this report is strictly limited to done moves, it can use that value directly as the reporting quantity.
 
 That avoids a full aggregation on `stock_move_line`, which is a better fit for large databases where reporting queries must stay as lean as possible.
+
+### Why this is much faster
+
+Compared to designs that aggregate `stock_move_line` for every query, this report is typically much faster on large datasets because it:
+
+- avoids scanning and grouping a much larger table (`stock_move_line`) when a direct value already exists on `stock_move`
+- avoids `SUM(...)` + `GROUP BY` work in the main reporting path
+- keeps one row per move directly from `stock_move`, reducing planner complexity
+- uses joins on indexed foreign keys only (`product_id`, `picking_id`, `product_tmpl_id`)
+- keeps the filter scope tight with `state = 'done'`
+
+In practical terms, this reduces CPU, memory, and temporary sorting overhead, which becomes very noticeable when the database contains millions of stock records.
 
 ## Reported Fields
 
