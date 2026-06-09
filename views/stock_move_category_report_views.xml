@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        stock_move_category_report_views.xml
+        =====================================
+        Defines all UI components for the "Delivered Products by Category" report:
+          1. Tree (list) view
+          2. Search view  — with filters, predefined date filters, and group-by options
+          3. Pivot view
+          4. Action (ir.actions.act_window)
+          5. Menu item under Inventory → Reports
+
+        No existing views or menus are modified.
+    -->
+
+    <!-- ================================================================
+         1. TREE VIEW
+         ================================================================ -->
+    <record id="view_stock_move_category_report_tree" model="ir.ui.view">
+        <field name="name">stock.move.category.report.tree</field>
+        <field name="model">stock.move.category.report</field>
+        <field name="arch" type="xml">
+            <tree string="Delivered Products by Category"
+                  create="false"
+                  edit="false"
+                  delete="false"
+                  default_order="date desc">
+
+                <field name="date"
+                       string="Date"
+                       optional="show"/>
+
+                <field name="product_category_id"
+                       string="Product Category"
+                       optional="show"/>
+
+                <field name="product_id"
+                       string="Product"
+                       optional="show"/>
+
+                <field name="quantity"
+                       string="Quantity"
+                       optional="show"/>
+
+                <field name="picking_id"
+                       string="Transfer"
+                       optional="show"/>
+
+                <field name="partner_id"
+                       string="Customer"
+                       optional="show"/>
+
+                <field name="company_id"
+                       string="Company"
+                       optional="show"
+                       groups="base.group_multi_company"/>
+
+                <field name="source_location_id"
+                       string="Source Location"
+                       optional="show"/>
+
+                <field name="destination_location_id"
+                       string="Destination Location"
+                       optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         2. SEARCH VIEW
+         ================================================================ -->
+    <record id="view_stock_move_category_report_search" model="ir.ui.view">
+        <field name="name">stock.move.category.report.search</field>
+        <field name="model">stock.move.category.report</field>
+        <field name="arch" type="xml">
+            <search string="Search Delivered Products by Category">
+
+                <!-- ── Free-text search fields ──────────────────────────── -->
+                <field name="product_category_id"
+                       string="Product Category"
+                       filter_domain="[('product_category_id', 'child_of', self)]"/>
+
+                <field name="product_id"
+                       string="Product"/>
+
+                <field name="partner_id"
+                       string="Customer"/>
+
+                <field name="picking_id"
+                       string="Transfer"/>
+
+                <field name="company_id"
+                       string="Company"
+                       groups="base.group_multi_company"/>
+
+                <field name="source_location_id"
+                       string="Source Location"/>
+
+                <field name="destination_location_id"
+                       string="Destination Location"/>
+
+                <field name="date"
+                       string="Date"/>
+
+                <!-- ── Predefined filters ────────────────────────────────── -->
+                <separator/>
+
+                <filter string="This Month"
+                        name="filter_this_month"
+                        domain="[
+                            ('date', '&gt;=', (context_today() + relativedelta(day=1)).strftime('%Y-%m-%d 00:00:00')),
+                            ('date', '&lt;=', (context_today() + relativedelta(day=31)).strftime('%Y-%m-%d 23:59:59'))
+                        ]"/>
+
+                <filter string="This Year"
+                        name="filter_this_year"
+                        domain="[
+                            ('date', '&gt;=', (context_today() + relativedelta(month=1, day=1)).strftime('%Y-%m-%d 00:00:00')),
+                            ('date', '&lt;=', (context_today() + relativedelta(month=12, day=31)).strftime('%Y-%m-%d 23:59:59'))
+                        ]"/>
+
+                <filter string="Last Year"
+                        name="filter_last_year"
+                        domain="[
+                            ('date', '&gt;=', (context_today() + relativedelta(years=-1, month=1, day=1)).strftime('%Y-%m-%d 00:00:00')),
+                            ('date', '&lt;=', (context_today() + relativedelta(years=-1, month=12, day=31)).strftime('%Y-%m-%d 23:59:59'))
+                        ]"/>
+
+                <!-- ── Group By options ──────────────────────────────────── -->
+                <group expand="0" string="Group By">
+
+                    <filter string="Product Category"
+                            name="group_by_category"
+                            context="{'group_by': 'product_category_id'}"/>
+
+                    <filter string="Product"
+                            name="group_by_product"
+                            context="{'group_by': 'product_id'}"/>
+
+                    <filter string="Customer"
+                            name="group_by_partner"
+                            context="{'group_by': 'partner_id'}"/>
+
+                    <filter string="Company"
+                            name="group_by_company"
+                            context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+
+                    <filter string="Transfer"
+                            name="group_by_picking"
+                            context="{'group_by': 'picking_id'}"/>
+
+                    <filter string="Year"
+                            name="group_by_year"
+                            context="{'group_by': 'date:year'}"/>
+
+                    <filter string="Month"
+                            name="group_by_month"
+                            context="{'group_by': 'date:month'}"/>
+
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         3. PIVOT VIEW
+         ================================================================ -->
+    <record id="view_stock_move_category_report_pivot" model="ir.ui.view">
+        <field name="name">stock.move.category.report.pivot</field>
+        <field name="model">stock.move.category.report</field>
+        <field name="arch" type="xml">
+            <!--
+                Default layout:
+                  Rows    → Product Category, then Product (drill-down)
+                  Columns → Year, then Month
+                  Measure → Quantity
+            -->
+            <pivot string="Delivered Products by Category"
+                   display_quantity="true">
+
+                <field name="product_category_id"
+                       type="row"/>
+
+                <field name="product_id"
+                       type="row"/>
+
+                <field name="date"
+                       interval="year"
+                       type="col"/>
+
+                <field name="date"
+                       interval="month"
+                       type="col"/>
+
+                <field name="quantity"
+                       type="measure"
+                       string="Quantity"/>
+
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         4. GRAPH VIEW (optional bar chart, complements pivot)
+         ================================================================ -->
+    <record id="view_stock_move_category_report_graph" model="ir.ui.view">
+        <field name="name">stock.move.category.report.graph</field>
+        <field name="model">stock.move.category.report</field>
+        <field name="arch" type="xml">
+            <graph string="Delivered Products by Category"
+                   type="bar"
+                   stacked="True">
+
+                <field name="product_category_id"
+                       type="row"/>
+
+                <field name="quantity"
+                       type="measure"
+                       string="Quantity"/>
+
+            </graph>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         5. ACTION
+         ================================================================ -->
+    <record id="action_stock_move_category_report" model="ir.actions.act_window">
+        <field name="name">Delivered Products by Category</field>
+        <field name="res_model">stock.move.category.report</field>
+        <field name="view_mode">tree,pivot,graph</field>
+        <field name="search_view_id"
+               ref="view_stock_move_category_report_search"/>
+        <!--
+                     Default context: group by Category so the report is immediately
+                     useful on first open.
+        -->
+        <field name="context">{
+            'search_default_group_by_category': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No delivered stock moves found.
+            </p>
+            <p>
+                This report shows all completed stock movements grouped by
+                Product Category.  Use the search bar to filter by category,
+                product, customer, date range, or company, and use Group By to
+                analyse deliveries from different angles.
+            </p>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         6. MENU ITEM  —  Inventory → Reports → Delivered Products by Category
+              parent: stock.menu_stock_reports  (core Reports submenu)
+              We do NOT alter or replace any existing menu entry.
+         ================================================================ -->
+    <menuitem id="menu_stock_move_category_report"
+              name="Delivered Products by Category"
+              parent="stock.menu_stock_reports"
+              action="action_stock_move_category_report"
+              sequence="25"
+              groups="stock.group_stock_user"/>
+
+</odoo>

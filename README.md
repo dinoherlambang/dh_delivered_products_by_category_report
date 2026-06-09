@@ -135,6 +135,7 @@ dh_delivered_products_by_category_report/
 - This module does not add stored related fields to Odoo core tables.
 - This module is designed for Odoo 13 Community.
 
-## License
+Developed by Dino Herlambang
 
+## License
 LGPL-3
