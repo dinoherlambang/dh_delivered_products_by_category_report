@@ -254,13 +254,13 @@
     </record>
 
     <!-- ================================================================
-         6. MENU ITEM  —  Inventory → Reports → Delivered Products by Category
-              parent: stock.menu_stock_reports  (core Reports submenu)
-              We do NOT alter or replace any existing menu entry.
-         ================================================================ -->
+           6. MENU ITEM  —  Inventory → Reporting → Delivered Products by Category
+                  parent: stock.menu_warehouse_report  (core Reporting submenu)
+                  We do NOT alter or replace any existing menu entry.
+           ================================================================ -->
     <menuitem id="menu_stock_move_category_report"
               name="Delivered Products by Category"
-              parent="stock.menu_stock_reports"
+                  parent="stock.menu_warehouse_report"
               action="action_stock_move_category_report"
               sequence="25"
               groups="stock.group_stock_user"/>
