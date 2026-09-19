@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        stock_move_line_views.xml
+        =========================
+        Defines UI components for "Delivery Orders by Serial Number":
+          1. Tree (List) view  - with columns for Date, Company, DO/Reference,
+                                 Product, Lot/Serial Number, Qty Done, UoM, Locations, State
+          2. Search view       - with filters for Done, Outgoing, Incoming, Internal,
+                                 Date widget, and Group By options: Company, Date, Product,
+                                 Delivery Order (picking), Delivery Report No. (reference),
+                                 and Lot / Serial Number
+          3. Pivot view        - matrix aggregation by DO, Product, Serial Number & Date
+          4. Window Action     - bound to stock.move.line with default groupings
+          5. Menu Item         - under Inventory → Reporting
+    -->
+
+    <!-- ================================================================
+         1. TREE (LIST) VIEW
+         ================================================================ -->
+    <record id="view_delivery_orders_by_serial_number_tree" model="ir.ui.view">
+        <field name="name">stock.move.line.delivery.orders.by.sn.tree</field>
+        <field name="model">stock.move.line</field>
+        <field name="arch" type="xml">
+            <tree string="Delivery Orders by Serial Number"
+                  create="false"
+                  edit="false"
+                  delete="false"
+                  default_order="date desc">
+
+                <field name="date"
+                       string="Date"
+                       optional="show"/>
+
+                <field name="company_id"
+                       string="Company"
+                       optional="show"/>
+
+                <field name="picking_id"
+                       string="Transfer / DO"
+                       optional="show"/>
+
+                <field name="reference"
+                       string="Delivery Report No. / Ref"
+                       optional="show"/>
+
+                <field name="product_id"
+                       string="Product"
+                       optional="show"/>
+
+                <field name="lot_id"
+                       string="Lot / Serial Number"
+                       optional="show"
+                       groups="stock.group_production_lot"/>
+
+                <field name="qty_done"
+                       string="Quantity Done"
+                       sum="Total Done"
+                       optional="show"/>
+
+                <field name="product_uom_id"
+                       string="Unit of Measure"
+                       optional="show"
+                       groups="uom.group_uom"/>
+
+                <field name="location_id"
+                       string="From"
+                       optional="show"/>
+
+                <field name="location_dest_id"
+                       string="To"
+                       optional="show"/>
+
+                <field name="state"
+                       string="Status"
+                       optional="show"/>
+
+            </tree>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         2. SEARCH VIEW
+         ================================================================ -->
+    <record id="view_delivery_orders_by_serial_number_search" model="ir.ui.view">
+        <field name="name">stock.move.line.delivery.orders.by.sn.search</field>
+        <field name="model">stock.move.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Delivery Orders by Serial Number">
+
+                <!-- ── Search Fields ────────────────────────────────────── -->
+                <field name="picking_id"
+                       string="Transfer / Delivery Order"/>
+
+                <field name="reference"
+                       string="Delivery Report No. / Ref"/>
+
+                <field name="product_id"
+                       string="Product"/>
+
+                <field name="lot_id"
+                       string="Lot / Serial Number"
+                       groups="stock.group_production_lot"/>
+
+                <field name="company_id"
+                       string="Company"/>
+
+                <field name="location_id"
+                       string="Source Location"
+                       filter_domain="[('location_id', 'child_of', self)]"/>
+
+                <field name="location_dest_id"
+                       string="Destination Location"
+                       filter_domain="[('location_dest_id', 'child_of', self)]"/>
+
+                <field name="date"
+                       string="Date"/>
+
+                <!-- ── Predefined Status & Operation Filters ─────────────── -->
+                <separator/>
+                <filter string="Done"
+                        name="filter_done"
+                        domain="[('state', '=', 'done')]"/>
+
+                <filter string="To Do"
+                        name="filter_todo"
+                        domain="[('state', 'not in', ['done', 'draft', 'cancel'])]"/>
+
+                <separator/>
+                <filter string="Outgoing (Deliveries)"
+                        name="filter_outgoing"
+                        domain="[('picking_id.picking_type_id.code', '=', 'outgoing')]"/>
+
+                <filter string="Incoming (Receipts)"
+                        name="filter_incoming"
+                        domain="[('picking_id.picking_type_id.code', '=', 'incoming')]"/>
+
+                <filter string="Internal Transfers"
+                        name="filter_internal"
+                        domain="[('picking_id.picking_type_id.code', '=', 'internal')]"/>
+
+                <!-- ── Date Filter Widget (Odoo 13 native) ───────────────── -->
+                <separator/>
+                <filter string="Date"
+                        name="filter_date"
+                        date="date"/>
+
+                <!-- ── Group By Options ──────────────────────────────────── -->
+                <group expand="0" string="Group By">
+
+                    <filter string="Company"
+                            name="group_by_company"
+                            context="{'group_by': 'company_id'}"/>
+
+                    <filter string="Date (Day)"
+                            name="group_by_date_day"
+                            context="{'group_by': 'date:day'}"/>
+
+                    <filter string="Date (Month)"
+                            name="group_by_date_month"
+                            context="{'group_by': 'date:month'}"/>
+
+                    <filter string="Date (Year)"
+                            name="group_by_date_year"
+                            context="{'group_by': 'date:year'}"/>
+
+                    <filter string="Product"
+                            name="group_by_product"
+                            context="{'group_by': 'product_id'}"/>
+
+                    <filter string="Delivery Order (DO)"
+                            name="group_by_picking"
+                            context="{'group_by': 'picking_id'}"/>
+
+                    <filter string="Delivery Report No. / Ref"
+                            name="group_by_reference"
+                            context="{'group_by': 'reference'}"/>
+
+                    <filter string="Lot / Serial Number"
+                            name="group_by_lot"
+                            context="{'group_by': 'lot_id'}"
+                            groups="stock.group_production_lot"/>
+
+                    <filter string="Status"
+                            name="group_by_state"
+                            context="{'group_by': 'state'}"/>
+
+                </group>
+
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         3. PIVOT VIEW
+         ================================================================ -->
+    <record id="view_delivery_orders_by_serial_number_pivot" model="ir.ui.view">
+        <field name="name">stock.move.line.delivery.orders.by.sn.pivot</field>
+        <field name="model">stock.move.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Delivery Orders by Serial Number">
+
+                <field name="company_id"
+                       type="row"/>
+
+                <field name="picking_id"
+                       type="row"/>
+
+                <field name="product_id"
+                       type="row"/>
+
+                <field name="lot_id"
+                       type="row"/>
+
+                <field name="date"
+                       interval="month"
+                       type="col"/>
+
+                <field name="qty_done"
+                       type="measure"/>
+
+            </pivot>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         4. ACTION
+         ================================================================ -->
+    <record id="action_delivery_orders_by_serial_number" model="ir.actions.act_window">
+        <field name="name">Delivery Orders by Serial Number</field>
+        <field name="res_model">stock.move.line</field>
+        <field name="view_mode">tree,pivot,form</field>
+        <field name="search_view_id"
+               ref="view_delivery_orders_by_serial_number_search"/>
+        <!--
+            Default context:
+              - Filter: Done movements
+              - Group By: Company → Date (Month) → Product → Delivery Order
+        -->
+        <field name="context">{
+            'search_default_filter_done': 1,
+            'search_default_group_by_company': 1,
+            'search_default_group_by_date_month': 1,
+            'search_default_group_by_product': 1,
+            'search_default_group_by_picking': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No delivery order lines found.
+            </p>
+            <p>
+                This view provides granular stock move line analysis with Lot/Serial Number tracking.
+                Use the group-by options to analyze quantities by Company, Date, Product,
+                Delivery Order, and Serial Number.
+            </p>
+        </field>
+    </record>
+
+    <!-- Explicit view bindings to ensure our dedicated tree & pivot are used -->
+    <record id="action_delivery_orders_by_sn_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_delivery_orders_by_serial_number_tree"/>
+        <field name="act_window_id" ref="action_delivery_orders_by_serial_number"/>
+    </record>
+
+    <record id="action_delivery_orders_by_sn_view_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_delivery_orders_by_serial_number_pivot"/>
+        <field name="act_window_id" ref="action_delivery_orders_by_serial_number"/>
+    </record>
+
+    <record id="action_delivery_orders_by_sn_view_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="3"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="stock.view_move_line_form"/>
+        <field name="act_window_id" ref="action_delivery_orders_by_serial_number"/>
+    </record>
+
+    <!-- ================================================================
+         5. MENU ITEM — Inventory → Reporting → Delivery Orders by Serial Number
+         ================================================================ -->
+    <menuitem id="menu_delivery_orders_by_serial_number"
+              name="Delivery Orders by Serial Number"
+              parent="stock.menu_warehouse_report"
+              action="action_delivery_orders_by_serial_number"
+              sequence="26"
+              groups="stock.group_stock_user"/>
+
+</odoo>

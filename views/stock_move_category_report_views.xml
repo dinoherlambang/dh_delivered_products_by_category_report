@@ -260,7 +260,7 @@
            ================================================================ -->
     <menuitem id="menu_stock_move_category_report"
               name="Delivered Products by Category"
-                  parent="stock.menu_warehouse_report"
+              parent="stock.menu_warehouse_report"
               action="action_stock_move_category_report"
               sequence="25"
               groups="stock.group_stock_user"/>

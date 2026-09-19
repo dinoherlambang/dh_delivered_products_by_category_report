@@ -11,7 +11,8 @@
         No existing Odoo tables are modified and no stored fields are added to
         core models.  The report is accessible from:
 
-            Inventory → Reports → Delivered Products by Category
+            Inventory → Reporting → Delivered Products by Category
+            Inventory → Reporting → Delivery Orders by Serial Number
     """,
     'author': 'DH',
     'category': 'Inventory',
@@ -19,6 +20,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/stock_move_category_report_views.xml',
+        'views/stock_move_line_views.xml',
     ],
     'installable': True,
     'application': False,

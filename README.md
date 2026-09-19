@@ -7,7 +7,9 @@ Odoo 13 Community addon that provides a dedicated Inventory report for analyzing
 This module adds a new read-only reporting model backed by a PostgreSQL SQL view:
 
 - Model: `stock.move.category.report`
-- Menu: Inventory -> Reports -> Delivered Products by Category
+- Menus:
+  - `Inventory -> Reporting -> Delivered Products by Category` (Category reporting view)
+  - `Inventory -> Reporting -> Delivery Orders by Serial Number` (Granular stock move line view with Serial Number and DO tracking)
 - Views: tree, pivot, graph, and search
 
 The report is independent from the standard Inventory reporting screens. It is designed for reporting use cases and does not add stored fields to `stock.move` or any other core model.
@@ -127,15 +129,16 @@ The model is intended to remain read-only.
 
 After installation, open:
 
-Inventory -> Reports -> Delivered Products by Category
+1. **Delivered Products by Category**:
+   `Inventory -> Reporting -> Delivered Products by Category`
+   - review completed movements in list view
+   - analyze totals in pivot view grouped by category, product, customer, company, or transfer
 
-From there you can:
-
-- review completed delivery movements in list view
-- analyze totals in pivot view
-- group by category, product, customer, company, or transfer
-- filter by month, year, or custom date ranges
-- drill down from pivot cells into the underlying stock moves
+2. **Delivery Orders by Serial Number**:
+   `Inventory -> Reporting -> Delivery Orders by Serial Number`
+   - review granular move operations with Lot / Serial Number tracking
+   - group by Company, Date (Day/Month/Year), Product, Delivery Order (Transfer), and Serial Number
+   - pivot analysis on Done Quantities across Delivery Orders and Products
 
 ## Module Structure
 
@@ -149,7 +152,8 @@ dh_delivered_products_by_category_report/
 ├── security/
 │   └── ir.model.access.csv
 └── views/
-    └── stock_move_category_report_views.xml
+    ├── stock_move_category_report_views.xml
+    └── stock_move_line_views.xml
 ```
 
 ## Notes
