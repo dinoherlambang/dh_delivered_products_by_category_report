@@ -32,9 +32,13 @@
                        string="Date"
                        optional="show"/>
 
+                <field name="picking_partner_id"
+                       string="Customer"
+                       optional="show"/>
+
                 <field name="company_id"
                        string="Company"
-                       optional="show"/>
+                       optional="hide"/>
 
                 <field name="picking_id"
                        string="Transfer / DO"
@@ -102,6 +106,9 @@
                        string="Lot / Serial Number"
                        groups="stock.group_production_lot"/>
 
+                <field name="picking_partner_id"
+                       string="Customer"/>
+
                 <field name="company_id"
                        string="Company"/>
 
@@ -147,6 +154,10 @@
 
                 <!-- ── Group By Options ──────────────────────────────────── -->
                 <group expand="0" string="Group By">
+
+                    <filter string="Customer"
+                            name="group_by_customer"
+                            context="{'group_by': 'picking_partner_id'}"/>
 
                     <filter string="Company"
                             name="group_by_company"
@@ -200,7 +211,7 @@
         <field name="arch" type="xml">
             <pivot string="Delivery Orders by Serial Number">
 
-                <field name="company_id"
+                <field name="picking_partner_id"
                        type="row"/>
 
                 <field name="picking_id"
@@ -239,7 +250,7 @@
         -->
         <field name="context">{
             'search_default_filter_done': 1,
-            'search_default_group_by_company': 1,
+            'search_default_group_by_customer': 1,
             'search_default_group_by_date_month': 1,
             'search_default_group_by_product': 1,
             'search_default_group_by_picking': 1
@@ -250,7 +261,7 @@
             </p>
             <p>
                 This view provides granular stock move line analysis with Lot/Serial Number tracking.
-                Use the group-by options to analyze quantities by Company, Date, Product,
+                Use the group-by options to analyze quantities by Customer, Date, Product,
                 Delivery Order, and Serial Number.
             </p>
         </field>

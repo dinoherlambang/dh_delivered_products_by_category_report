@@ -137,7 +137,7 @@ After installation, open:
 2. **Delivery Orders by Serial Number**:
    `Inventory -> Reporting -> Delivery Orders by Serial Number`
    - review granular move operations with Lot / Serial Number tracking
-   - group by Company, Date (Day/Month/Year), Product, Delivery Order (Transfer), and Serial Number
+   - group by Customer, Date (Day/Month/Year), Product, Delivery Order (Transfer), and Serial Number
    - pivot analysis on Done Quantities across Delivery Orders and Products
 
 ## Module Structure
@@ -148,7 +148,8 @@ dh_delivered_products_by_category_report/
 ├── __manifest__.py
 ├── models/
 │   ├── __init__.py
-│   └── stock_move_category_report.py
+│   ├── stock_move_category_report.py
+│   └── stock_move_line.py
 ├── security/
 │   └── ir.model.access.csv
 └── views/
