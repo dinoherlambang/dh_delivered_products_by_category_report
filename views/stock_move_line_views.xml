@@ -42,7 +42,7 @@
 
                 <field name="picking_id"
                        string="Transfer / DO"
-                       optional="show"/>
+                       optional="hide"/>
 
                 <field name="reference"
                        string="Delivery Report No. / Ref"
@@ -64,16 +64,16 @@
 
                 <field name="product_uom_id"
                        string="Unit of Measure"
-                       optional="show"
+                       optional="hide"
                        groups="uom.group_uom"/>
 
                 <field name="location_id"
                        string="From"
-                       optional="show"/>
+                       optional="hide"/>
 
                 <field name="location_dest_id"
                        string="To"
-                       optional="show"/>
+                       optional="hide"/>
 
                 <field name="state"
                        string="Status"
